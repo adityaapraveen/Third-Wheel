@@ -54,3 +54,11 @@ Say: “25 representatives. 60 replayable dates. 600 directional opinions. Let t
 - Keep the disclosure visible; the supplied demo is fictional.
 - Show one date and one expanded ranking; avoid long cast scrolling.
 - Insert the deployed website and video links into README only after publishing.
+
+## Optional 50-second segment — A life beyond the chat
+
+Open **Life Together**. Keep **Cute world demo** selected. Create a shared household (or begin a new fictional life), choose **Until paused**, then **Continue life**. Breakfast advances to work after 8 seconds. Leave it running to show lunch, gardening/friends, dinner, and bedtime. One full day takes about 48 seconds. Use **One step** while paused if you need to jump between scenes quickly.
+
+Say: “They are more than messages now. These little characters share a home, work on simple tasks, keep their own plans, and talk while living their day. You can see what they are doing and what they finish. This presentation mode is authored and runs offline, so it is reliable during the demo.”
+
+Open **Household journal** after pausing to show completed tasks. Then say: “The next stage is autonomous action choices, more realistic work, independent friends, deeper memory, and a world that keeps running in the background. This is the visual prototype for that direction, not a prediction of anyone's real relationship.”

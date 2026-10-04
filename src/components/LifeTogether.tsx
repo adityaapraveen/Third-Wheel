@@ -20,6 +20,8 @@ import {
   type LifeState,
 } from "@/lib/life/schema";
 import { Avatar } from "./Avatar";
+import { HouseholdWorld } from "./HouseholdWorld";
+import { stepDemoLife } from "@/lib/life/tasks";
 export function LifeTogether() {
   const params = useSearchParams(),
     { world, save } = useLife(),
@@ -32,6 +34,7 @@ export function LifeTogether() {
     [aId, setAId] = useState(""),
     [bId, setBId] = useState(""),
     [budget, setBudget] = useState(12),
+    [mode, setMode] = useState<"demo" | "model">("demo"),
     [steps, setSteps] = useState(0);
   const controller = useRef<AbortController | null>(null),
     active = useRef(false),
@@ -91,6 +94,11 @@ export function LifeTogether() {
     const before = useLife.getState().world!;
     controller.current = new AbortController();
     try {
+      if (mode === "demo") {
+        save(stepDemoLife(before));
+        setSteps((s) => s + 1);
+        return;
+      }
       const res = await fetch("/api/life/step", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,11 +135,14 @@ export function LifeTogether() {
       setRunning(false);
       return;
     }
-    const timer = setTimeout(() => {
-      if (active.current) void step();
-    }, 9000);
+    const timer = setTimeout(
+      () => {
+        if (active.current) void step();
+      },
+      mode === "demo" ? 8000 : 9000,
+    );
     return () => clearTimeout(timer);
-  }, [running, world?.revision, busy, steps, budget]);
+  }, [running, world?.revision, busy, steps, budget, mode]);
   function resume() {
     if (!world) return;
     setSteps(0);
@@ -154,7 +165,7 @@ export function LifeTogether() {
             Life <span className="serif lime">together.</span>
           </h1>
           <p className="muted">
-            The little plans. The missed texts. The ordinary days.
+            A cozy block world. Little tasks. A life beyond the chat.
           </p>
         </div>
         <span className="source-pill">FICTIONAL SHARED HOUSEHOLD</span>
@@ -167,6 +178,19 @@ export function LifeTogether() {
       <div className="life-layout">
         <aside className="panel life-controls">
           <span className="eyebrow">CAST THE HOUSEHOLD</span>
+          <label>
+            Playback mode
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as "demo" | "model")}
+              disabled={running || busy}
+            >
+              <option value="demo">
+                Cute world demo · offline &amp; instant
+              </option>
+              <option value="model">Model conversations · uses API</option>
+            </select>
+          </label>
           <label>
             Agent A
             <select
@@ -215,7 +239,7 @@ export function LifeTogether() {
               {[0, 6, 12, 24, 48].map((n) => (
                 <option key={n} value={n}>
                   {n === 0
-                    ? "Until paused · ongoing model usage"
+                    ? `Until paused${mode === "model" ? " · ongoing model usage" : " · continuous demo"}`
                     : `${n} steps · ${n / 6} simulated days`}
                 </option>
               ))}
@@ -253,6 +277,13 @@ export function LifeTogether() {
               <SkipForward size={15} /> One step
             </button>
           </div>
+          {mode === "demo" && (
+            <p className="demo-mode-note">
+              Presentation mode: a task completes every 8 seconds. No model
+              calls. Their little routine repeats with shared responsibilities
+              each day.
+            </p>
+          )}
           <p className="caption">
             Runs while this page is open. Use Until paused for continuous life,
             or choose a step budget; Continue resumes the same life. Refresh
@@ -260,9 +291,9 @@ export function LifeTogether() {
             requests.
           </p>
           <p className="caption">
-            Up to two model turns per active step, each with one repair retry.
-            Quiet work and sleep steps use no model. Agent model turns
-            attempted: {world?.modelCalls || 0}. Current run: {steps}
+            Model mode: up to two model turns per active step, each with one
+            repair retry. Quiet work and sleep steps use no model. Agent model
+            turns attempted: {world?.modelCalls || 0}. Current run: {steps}
             {budget ? `/${budget}` : ""} steps.
           </p>
           {busy && (
@@ -287,6 +318,11 @@ export function LifeTogether() {
           </div>
           {world ? (
             <>
+              <HouseholdWorld
+                world={world}
+                running={running && !busy}
+                mode={mode}
+              />
               <div className="life-cast">
                 {world.participants.map((p) => (
                   <div key={p.id}>
@@ -316,32 +352,45 @@ export function LifeTogether() {
                   <p>Continue life, or take one step to see what happens.</p>
                 </div>
               )}
-              <div className="life-events" aria-live="polite">
-                {world.events.map((event) => {
-                  const person = world.participants.find(
-                    (p) => p.id === event.agentId,
-                  );
-                  const when = clock(event.tick);
-                  return (
-                    <article
-                      className={`life-event ${event.kind}`}
-                      key={event.id}
-                    >
-                      <div className="micro">
-                        DAY {when.day} · {String(when.hour).padStart(2, "0")}:00
-                        / {person?.name.split(" ")[0] || "THE HOUSEHOLD"} /{" "}
-                        {event.kind === "text"
-                          ? "TEXT MESSAGE"
-                          : event.kind === "scene"
-                            ? "LIFE UPDATE"
-                            : "QUIET TIME"}{" "}
-                        {event.mode === "fallback" ? " / FALLBACK" : ""}
-                      </div>
-                      <p>{event.text}</p>
-                    </article>
-                  );
-                })}
-              </div>
+              <details className="world-journal" open={!running}>
+                <summary>
+                  Household journal · {world.events.length} recent events
+                </summary>
+                <div className="life-events" aria-live="polite">
+                  {world.events
+                    .slice()
+                    .reverse()
+                    .map((event) => {
+                      const person = world.participants.find(
+                        (p) => p.id === event.agentId,
+                      );
+                      const when = clock(event.tick);
+                      return (
+                        <article
+                          className={`life-event ${event.kind}`}
+                          key={event.id}
+                        >
+                          <div className="micro">
+                            DAY {when.day} ·{" "}
+                            {String(when.hour).padStart(2, "0")}:00 /{" "}
+                            {person?.name.split(" ")[0] || "THE HOUSEHOLD"} /{" "}
+                            {event.kind === "text"
+                              ? "TEXT MESSAGE"
+                              : event.kind === "scene"
+                                ? "LIFE UPDATE"
+                                : "QUIET TIME"}{" "}
+                            {event.mode === "fallback"
+                              ? " / FALLBACK"
+                              : event.mode === "demo"
+                                ? " / AUTHORED DEMO"
+                                : ""}
+                          </div>
+                          <p>{event.text}</p>
+                        </article>
+                      );
+                    })}
+                </div>
+              </details>
               <details className="life-memory">
                 <summary>
                   What the household remembers ({world.memories.length})

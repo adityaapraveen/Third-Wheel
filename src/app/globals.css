@@ -3122,3 +3122,265 @@ dialog a:hover,
     letter-spacing: 1px;
   }
 }
+
+/* Original block characters and a tiny, deterministic household for presentations. */
+.household-world {
+  margin: 24px 0;
+  background: #f7efe1;
+  border: 1px solid #dfcfb9;
+  border-radius: 18px;
+  overflow: hidden;
+  color: #60544f;
+  box-shadow: 0 12px 50px #0002;
+}
+.world-heading {
+  padding: 22px 24px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.world-kicker {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #99766d;
+}
+.world-heading h2 {
+  font-size: 28px;
+  letter-spacing: -1px;
+  color: #60544f;
+  margin: 5px 0 0;
+  font-family: Georgia, serif;
+}
+.world-live {
+  background: #e5e7cf;
+  color: #737c55;
+  border-radius: 20px;
+  padding: 7px 10px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.world-playing .world-live {
+  background: #d9e9cc;
+  color: #4e7346;
+}
+.world-stage {
+  position: relative;
+  padding: 0 16px;
+}
+.world-stage svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.room-label {
+  fill: #776452;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
+}
+.world-character {
+  transition: transform 1.8s cubic-bezier(0.42, 0, 0.2, 1);
+}
+.world-scene-tag {
+  position: absolute;
+  top: 12px;
+  left: 30px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: #6d7e65;
+}
+.world-night .world-scene-tag {
+  color: #625b7a;
+}
+.world-task-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 18px 22px;
+}
+.world-task {
+  background: #fffcf5;
+  border: 1px solid #e6d9c7;
+  border-radius: 10px;
+  padding: 15px;
+  min-width: 0;
+}
+.world-task-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.world-task-title > div {
+  min-width: 0;
+}
+.world-task-title span:not(.pixel-face) {
+  font-size: 10px;
+  color: #9a8274;
+}
+.world-task-title strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.pixel-face {
+  background: #e5b3bd;
+  border: 3px solid #d393a1;
+  color: #6c5053;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.face-1 {
+  background: #c3cce5;
+  border-color: #9faece;
+}
+.world-task-title .world-task-state {
+  margin-left: auto;
+  font-size: 8px !important;
+  letter-spacing: 1px;
+}
+.task-track {
+  height: 4px;
+  margin: 13px 0;
+  background: #eee3d3;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.task-track > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #97b58d;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.world-playing .task-track > span {
+  animation: task-fill linear forwards;
+}
+.world-speech {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+  color: #7d6861;
+  min-height: 57px;
+}
+.world-footnote {
+  border-top: 1px solid #e3d6c3;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 9px;
+  color: #9a8274;
+  padding: 13px 22px;
+}
+.world-playing .block-body {
+  animation: block-bob 1.3s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.world-playing .tool-arm {
+  animation: block-work 1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: top left;
+}
+.world-playing .asleep .block-body {
+  animation: block-bob 4s ease-in-out infinite;
+}
+.world-playing .asleep .tool-arm {
+  animation: none;
+}
+.world-playing .water-drops,
+.world-playing .coffee-steam {
+  animation: tiny-flutter 1.4s ease-in-out infinite;
+}
+.world-playing .screen-lines {
+  animation: tiny-flutter 2s ease-in-out infinite;
+}
+.demo-mode-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #c8d8ab;
+  background: #273122;
+  padding: 13px;
+  border: 1px solid #435437;
+  border-radius: 5px;
+  margin-top: 18px;
+}
+.world-journal {
+  margin: 24px 0;
+}
+.world-journal > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 15px;
+  border: 1px solid var(--line);
+}
+@keyframes task-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes block-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes block-work {
+  50% {
+    transform: rotate(-12deg);
+  }
+}
+@keyframes tiny-flutter {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (max-width: 540px) {
+  .world-heading {
+    padding: 18px 16px 12px;
+  }
+  .world-heading h2 {
+    font-size: 23px;
+  }
+  .world-kicker {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .world-stage {
+    padding: 0 8px;
+  }
+  .world-scene-tag {
+    left: 18px;
+    top: 8px;
+    font-size: 6px;
+  }
+  .world-task-list {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 10px;
+  }
+  .world-speech {
+    min-height: 0;
+  }
+  .world-footnote {
+    padding: 12px 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-character {
+    transition: none;
+  }
+  .household-world * {
+    animation: none !important;
+  }
+  .world-playing .task-track > span {
+    transform: scaleX(1);
+  }
+}

@@ -18,7 +18,7 @@ export const LifeEventSchema = z.object({
   agentId: z.string().max(100),
   kind: z.enum(["text", "scene", "world"]),
   text: z.string().min(1).max(650),
-  mode: z.enum(["model", "fallback", "world"]),
+  mode: z.enum(["model", "fallback", "world", "demo"]),
 });
 export const LifeStateSchema = z.object({
   id: z.string().max(100),
