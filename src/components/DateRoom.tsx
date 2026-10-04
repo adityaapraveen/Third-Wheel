@@ -22,6 +22,8 @@ import type {
 import { Avatar } from "./Avatar";
 import { EvidenceDrawer } from "./EvidenceDrawer";
 import { consumeEvents } from "@/lib/stream";
+import { useLife } from "@/store/life";
+import { startLife } from "@/lib/life/schema";
 export function DateRoom({
   a,
   b,
@@ -512,6 +514,13 @@ export function DateRoom({
       </div>
       {finished && (
         <div className="date-actions">
+          <Link
+            className="button primary"
+            href={`/life?a=${encodeURIComponent(a.id)}&b=${encodeURIComponent(b.id)}&source=${onBack ? "lab" : "demo"}`}
+            onClick={() => useLife.getState().save(startLife(a, b, finished))}
+          >
+            Imagine a life together <ArrowUpRight size={16} />
+          </Link>
           <button
             className="button secondary"
             onClick={() => {

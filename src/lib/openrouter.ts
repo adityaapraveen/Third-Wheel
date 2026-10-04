@@ -5,6 +5,7 @@ export async function modelJSON<T>(
   user: string,
   schema: z.ZodType<T>,
   maxTokens = 2200,
+  options: { signal?: AbortSignal; timeoutMs?: number } = {},
 ): Promise<T> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("OpenRouter is not configured.");
@@ -30,7 +31,12 @@ export async function modelJSON<T>(
           temperature: 0.65,
           max_tokens: maxTokens,
         }),
-        signal: AbortSignal.timeout(15000),
+        signal: options.signal
+          ? AbortSignal.any([
+              options.signal,
+              AbortSignal.timeout(options.timeoutMs || 15000),
+            ])
+          : AbortSignal.timeout(options.timeoutMs || 15000),
         cache: "no-store",
       });
       if (!res.ok) throw new Error(`Model provider returned ${res.status}`);
@@ -43,6 +49,7 @@ export async function modelJSON<T>(
         ),
       );
     } catch (error) {
+      if (options.signal?.aborted) throw error;
       if (attempt === 1) throw error;
       repair =
         "\nYour last response was invalid. Return a complete JSON object matching the supplied schema. No markdown.";

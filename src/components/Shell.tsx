@@ -32,6 +32,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/demo?tab=dates" onClick={() => setOpen(false)}>
             Date Night <span className="tiny-live" />
           </Link>
+          <Link href="/life" onClick={() => setOpen(false)}>
+            Life Together
+          </Link>
           <Link href="/lab" className="nav-cta" onClick={() => setOpen(false)}>
             Build my cast <ArrowUpRight size={16} />
           </Link>

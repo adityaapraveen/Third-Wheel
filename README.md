@@ -6,7 +6,7 @@
 
 The complete offline showcase contains **25 fictional characters, 60 precomputed dates, and 600 directional rankings**. Fictional evidence and outcomes are explicitly labeled in the interface. This is not a verified 25-real-person dataset, and the stock portraits do not establish anyone's identity. `seed/people.json` intentionally contains no invented real-person links.
 
-Live profile reading is implemented behind server-only Apify adapters. Live dates alternate six independent DatingAgent turns and two reflections through OpenRouter. Without a model key, dates use an explicitly labeled fallback simulation. Provider success against real profiles has not been verified in this checkout because credentials were not supplied. Do not represent fallback dates as model-generated conversations or fictional receipts as scraped evidence.
+Live profile reading is implemented behind server-only Apify adapters. Live dates alternate six independent DatingAgent turns and two reflections through OpenRouter. Without a model key, dates use an explicitly labeled fallback simulation. Local provider keys are configured and a real OpenRouter-generated household turn has been verified; the free model also produced fallback turns. Real-profile scraping remains unverified. Do not represent fallback dates as model-generated conversations or fictional receipts as scraped evidence.
 
 ## Run locally
 
@@ -160,3 +160,15 @@ Overall explanation (under 200 characters):
 Technical explanation (under 500 characters):
 
 > Next.js server routes call Apify public-profile actors for LinkedIn and Instagram, normalize their output, and send only those two sources to OpenRouter for structured analysis. Zod validates evidence-backed cards. Alternating DatingAgent turns stream live dates; static demo data makes replay reliable and cheap. Rankings combine directional preferences and date outcomes. The shipped cast is clearly fictional; live scraping requires server credentials.
+
+## Life Together
+
+`/life` extends a pair's story into an explicitly fictional shared household. After a date, **Imagine a life together** transfers its visible transcript into initial memories. It does not infer that the real people date, live together, have particular friends, or experience the invented events.
+
+The world advances through six periods per simulated day: morning, work, midday texting, independent plans, evening together, and sleep. Active periods call each character separately, passing the first turn to the other character. Work and sleep are quiet deterministic periods with zero model requests. Agents can negotiate chores, maintain independent social time, misunderstand a plan, disagree, or try to repair friction; model prompts do not force every scene into romance or a fight.
+
+Choose **Until paused** for ongoing execution, or a bounded step budget. **Pause** cancels the browser request and stops subsequent turns. A request already sent to a provider may still incur cost. Each active step uses up to two model turns, each with one repair retry. The interface exposes model-turn attempts and labels fallback events. The displayed warmth/friction values describe fictional story state, not psychological measurements.
+
+Zustand persists the latest household, 120 visible events, and 24 concise event memories locally. Execution pauses on refresh or page closure. `POST /api/life/step` advances one bounded step; no infinite request is held open. One browser tab is the intended runner. This prototype does not provide distributed coordination between tabs or durable background execution. For simulation while the browser is closed, move the scheduler into a worker and checkpoint in a persistent database.
+
+The fastest implementation for this two-character prototype is a small typed world loop around the existing agent client. For a larger durable simulation, [LangGraph's JavaScript persistence](https://docs.langchain.com/oss/javascript/langgraph/persistence) provides resumable state. [Stanford Generative Agents](https://github.com/joonspk-research/generative_agents) demonstrates memory/planning/reflection for everyday social behavior, but its Python/Django environment is not a drop-in Next.js library. [OASIS](https://github.com/camel-ai/oasis) focuses on social-media interactions rather than a shared household.
