@@ -86,9 +86,14 @@ describe("server boundaries and streamed lifecycle", () => {
               ]
             : [
                 {
-                  fullName: "Ada Example",
-                  headline: "Software engineer",
-                  about: "I build software",
+                  success: true,
+                  status: "success",
+                  error: null,
+                  profile: {
+                    fullName: "Ada Example",
+                    headline: "Software engineer",
+                    about: "I build software",
+                  },
                 },
               ],
       })),
@@ -113,12 +118,10 @@ describe("server boundaries and streamed lifecycle", () => {
   });
   it("blocks private Instagram before requesting LinkedIn", async () => {
     vi.stubEnv("APIFY_TOKEN", "test-only");
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => [{ username: "ada", isPrivate: true }],
-      });
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [{ username: "ada", isPrivate: true }],
+    });
     vi.stubGlobal("fetch", fetcher);
     const res = await analyze(
       request("/api/analyze", {

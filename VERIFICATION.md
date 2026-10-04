@@ -4,7 +4,7 @@ Completed locally against the continued checkout:
 
 - Clean `npm ci` passed with Node 22.23.2.
 - `npm run typecheck` passed.
-- `npm test` passed: 36 tests, including server-route streams, independent life turns, bounded memory, quiet periods, cancellation of an in-flight provider call without retrying, and offline task completion across days.
+- `npm test` passed: 42 tests, including server-route streams with the actual nested LinkedIn actor format, failure-status rejection, independent life turns, bounded memory, quiet periods, cancellation of an in-flight provider call without retrying, and offline task completion across days.
 - `npm run build` passed: 120 generated route entries, including `/life` and `/api/life/step`.
 - `npm audit` reported zero vulnerabilities after updating Vitest to 4.1.11.
 - `node scripts/smoke-http.mjs` checked 113 user-facing production routes, all returning HTTP 200. Every profile's rendered HTML includes Needs, Hobbies, and Interests.
@@ -18,6 +18,8 @@ Completed locally against the continued checkout:
 - Visual-world checks covered original block characters, task props, active character/progress animations, breakfast-to-work progression, completed task journal entries, day rollover with swapped responsibilities, Pause, and refresh retention. Desktop 1280×900 and mobile 390×844 had no horizontal overflow. Offline playback retained zero model-turn attempts.
 
 ## Limits of this verification
+
+The existing successful LinkedIn actor dataset was read without launching a new scrape. The fixed normalizer accepted its nested `profile`, preserved its source URL, and extracted its name and avatar. This verifies the reported parsing failure against real provider output. That result had no headline or experience entries; missing public fields remain empty. No complete new live analysis of a real LinkedIn/Instagram pair was run as part of this fix.
 
 No real scrape, verified 25-real-person cast, or Vercel deployment was claimed. OpenRouter is configured and real model output was observed, but uninterrupted free-provider availability is not guaranteed. The shipped cast, receipts, preferences, replay outcomes, and household events remain explicitly fictional. Real romantic needs or private lives are not inferred from public profiles.
 

@@ -39,6 +39,54 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("input boundary", () => {
+  it("reads the default LinkedIn actor's nested successful profile", () => {
+    const profile = normalizeLinkedIn(
+      {
+        success: true,
+        status: "success",
+        error: null,
+        profile: {
+          fullName: "Ada Example",
+          headline: "Engineer",
+          about: "Builds small tools",
+          location: "London",
+          profilePictureUrl: "https://media.licdn.com/example.jpg",
+          experience: [{ title: "Engineer", companyName: "Example" }],
+          skills: ["TypeScript"],
+        },
+      },
+      "https://www.linkedin.com/in/ada/",
+    );
+    expect(profile.name).toBe("Ada Example");
+    expect(profile.about).toBe("Builds small tools");
+    expect(profile.avatarUrl).toBe("https://media.licdn.com/example.jpg");
+    expect(profile.experience).toEqual(["Engineer · Example"]);
+    expect(profile.skills).toEqual(["TypeScript"]);
+  });
+  it.each([
+    ["blocked", "temporarily blocked"],
+    ["login_required", "requires a login"],
+    ["not_found", "not found"],
+    ["rate_limited", "rate-limiting"],
+  ])(
+    "reports LinkedIn %s without accepting partial data",
+    (status, message) => {
+      expect(() =>
+        normalizeLinkedIn(
+          { success: false, status, profile: { fullName: "Partial Name" } },
+          "",
+        ),
+      ).toThrow(message);
+    },
+  );
+  it("rejects a malformed nested LinkedIn response instead of fabricating a name", () => {
+    expect(() =>
+      normalizeLinkedIn(
+        { success: true, status: "success", profile: { headline: "Engineer" } },
+        "",
+      ),
+    ).toThrow("without a name");
+  });
   it("canonicalizes public links and strips tracking", () => {
     expect(
       profileUrl("https://linkedin.com/in/ada/?tracking=1", "linkedin"),
@@ -195,12 +243,10 @@ describe("agent and persona failures", () => {
   });
   it("falls back on invalid model JSON and retries once", async () => {
     vi.stubEnv("OPENROUTER_API_KEY", "test-only");
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ choices: [{ message: { content: "bad json" } }] }),
-      });
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: "bad json" } }] }),
+    });
     vi.stubGlobal("fetch", fetcher);
     const p = await generatePersona("ada", li(), ig());
     expect(fetcher).toHaveBeenCalledTimes(2);
@@ -212,29 +258,27 @@ describe("agent and persona failures", () => {
     vi.stubEnv("OPENROUTER_API_KEY", "test-only");
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: JSON.stringify({
-                    ...people[0],
-                    interests: [
-                      {
-                        label: "Invented",
-                        confidence: 99,
-                        evidenceIds: ["not-in-sources"],
-                      },
-                    ],
-                  }),
-                },
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  ...people[0],
+                  interests: [
+                    {
+                      label: "Invented",
+                      confidence: 99,
+                      evidenceIds: ["not-in-sources"],
+                    },
+                  ],
+                }),
               },
-            ],
-          }),
+            },
+          ],
         }),
+      }),
     );
     const p = await generatePersona("ada", li(), ig());
     expect(p.analysisMode).toBe("fallback");

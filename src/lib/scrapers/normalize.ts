@@ -57,36 +57,67 @@ export function normalizeLinkedIn(
   row: Row,
   sourceUrl: string,
 ): LinkedInProfile {
+  const status = typeof row.status === "string" ? row.status : "";
+  const failures: Record<string, string> = {
+    invalid_url:
+      "LinkedIn rejected this link. Use a public person profile URL containing /in/.",
+    not_found: "This LinkedIn profile was not found. Check the profile link.",
+    login_required:
+      "LinkedIn requires a login for this profile. Only public guest profiles can be read; try another public profile.",
+    blocked:
+      "LinkedIn temporarily blocked the public profile reader. Try again later or use the fictional demo for now.",
+    rate_limited:
+      "LinkedIn is rate-limiting the public profile reader. Wait a few minutes before trying again.",
+    network_error: "The reader could not reach LinkedIn. Try again later.",
+    parse_error:
+      "The reader could not extract this LinkedIn profile. Try another public profile or report the actor run to its developer.",
+  };
+  if (row.success === false || (status && status !== "success"))
+    throw new Error(
+      failures[status] ||
+        "LinkedIn could not return a successful public profile. Try another public profile or use the fictional demo.",
+    );
   if (row.error || row.errorDescription)
     throw new Error(
       "LinkedIn could not be read. Check that the person profile is publicly accessible.",
     );
+  // The default actor wraps successful data in `profile`; alternate actors
+  // may return the legacy flat format. Never treat a failure row as a profile.
+  const profile =
+    row.profile &&
+    typeof row.profile === "object" &&
+    !Array.isArray(row.profile)
+      ? (row.profile as Row)
+      : row;
   const name = str(
-    row.fullName ||
-      row.full_name ||
-      row.name ||
-      [row.firstName, row.lastName].filter(Boolean).join(" "),
+    profile.fullName ||
+      profile.full_name ||
+      profile.name ||
+      [profile.firstName, profile.lastName].filter(Boolean).join(" "),
     100,
-  );
+  ).trim();
   if (!name)
     throw new Error(
-      "LinkedIn returned no readable profile. Try again or replace the configured actor.",
+      "The LinkedIn reader returned a profile without a name. Try another public profile; if it repeats, check the configured actor's output format.",
     );
   return {
     name,
-    headline: str(row.headline || row.title, 200),
-    about: str(row.about || row.summary, 4000),
-    location: str(row.locationName || row.location, 120),
-    experience: list(row.experiences || row.experience || row.positions),
-    education: list(row.educations || row.education),
-    skills: list(row.skills),
-    certifications: list(row.certifications),
-    languages: list(row.languages),
+    headline: str(profile.headline || profile.title, 200),
+    about: str(profile.about || profile.summary, 4000),
+    location: str(profile.locationName || profile.location, 120),
+    experience: list(
+      profile.experiences || profile.experience || profile.positions,
+    ),
+    education: list(profile.educations || profile.education),
+    skills: list(profile.skills),
+    certifications: list(profile.certifications),
+    languages: list(profile.languages),
     avatarUrl: safeImageUrl(
-      row.profilePicture ||
-        row.profilePicUrl ||
-        row.profileImageUrl ||
-        row.photo,
+      profile.profilePictureUrl ||
+        profile.profilePicture ||
+        profile.profilePicUrl ||
+        profile.profileImageUrl ||
+        profile.photo,
     ),
     sourceUrl,
   };
